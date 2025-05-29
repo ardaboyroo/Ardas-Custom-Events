@@ -12,6 +12,7 @@ namespace arda
 {
 	internal class CustomEventsManager : CustomEventsHandler
 	{
+		private Config _config;
 		private Random _random = new();
 		private AbstractCustomEvent _currentEvent;
 
@@ -26,14 +27,14 @@ namespace arda
 			}
 		}
 		private AbstractCustomEvent _debugEvent;
-		private int _eventChance = 20;
+		private int _eventChance;
 		private List<Type> _availableEvents;
 		private int _eventCounter = 0;
 
 		public CustomEventsManager()
 		{
 			CustomHandlersManager.RegisterEventsHandler(this);
-
+			_config = ArdasCustomEventsPlugin.Instance.Config;
 			RegisterAllCustomEvents();
 		}
 
@@ -44,7 +45,9 @@ namespace arda
 
 		public override void OnServerRoundStarting(RoundStartingEventArgs ev)
 		{
+			_currentEvent?.Dispose();
 			_currentEvent = null;
+			
 
 			if (_debugEvent != null)
 			{
@@ -54,7 +57,8 @@ namespace arda
 
 			if (_availableEvents.Any() && _random.Next(0, 100) < _eventChance)
 			{
-				_eventChance = 20;
+				Logger.Info($"Event chosen with chance: {_eventChance}");
+				_eventChance = 0;
 
 				ChooseNextEvent();
 				Logger.Info($"Current Event: {_currentEvent.GetType().Name}");
@@ -62,7 +66,8 @@ namespace arda
 			}
 			else
 			{
-				_eventChance *= _eventChance;
+				_eventChance += _eventChance == 0 ? _config.EventChance : _eventChance;
+				Logger.Info($"No event chosen, chance increased to: {_eventChance}");
 			}
 		}
 

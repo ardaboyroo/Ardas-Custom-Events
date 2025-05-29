@@ -32,32 +32,47 @@ namespace arda
 		public TDMEvent()
 		{
 			InventoryExtensions.OnItemRemoved += OnItemRemoved;
-			InventorySystem.Items.Jailbird.JailbirdItem.OnItemRemoved += tets;
 		}
 
-		~TDMEvent()
+		public override void Dispose()
 		{
+			base.Dispose();
 			InventoryExtensions.OnItemRemoved -= OnItemRemoved;
-		}
-		
-		void tets(ItemBase e)
-		{
-			Info($"item removed fam: {e.ItemTypeId}");
 		}
 
 		private void OnItemRemoved(ReferenceHub rh, ItemBase ib, ItemPickupBase ip)
 		{
-			Info($"removed item {ib.ItemTypeId}, {ib.ItemTypeId == ItemType.Jailbird}");
 			if (ib.ItemTypeId == ItemType.Jailbird)
 			{
-				Info("que!");
-				Pickup bird = Pickup.Get(ip);
-				Info($"jailbird removed, was it destroyed: {bird.IsDestroyed}");
-				//bird.Destroy();
-				Item item = Player.Get(rh).AddItem(ItemType.Jailbird);
-				Player.Get(rh).CurrentItem = item;
+				Player plr = Player.Get(rh);
+				if (plr == null) return;
+				if (plr.Role == RoleTypeId.ChaosRepressor || plr.Role == RoleTypeId.NtfCaptain)
+				{
+					// Jailbird has ran out of charges
+					if (ip == null)
+					{
+						if (plr.Items.Any(item => item.Type == ItemType.GunCOM18)) return;
+
+						Item item = plr.AddItem(ItemType.GunCOM18);
+						plr.CurrentItem = item;
+						plr.AddAmmo(ItemType.Ammo9x19, 60);
+					}
+				}
+				//	if (ip != null)
+				//	{
+				//		// dropped on the floor
+				//		Pickup bird = Pickup.Get(ip);
+				//		bird.Destroy();
+				//		Item item = Player.Get(rh).AddItem(ItemType.Jailbird);
+				//		Player.Get(rh).CurrentItem = item;
+				//	}
+				//	else
+				//	{
+				//		// ran out of charges
+				//		Item item = Player.Get(rh).AddItem(ItemType.Jailbird);
+				//		Player.Get(rh).CurrentItem = item;
+				//	}
 			}
-			Info("just to be sure");
 		}
 
 		public override void OnPlayerReceivedLoadout(PlayerReceivedLoadoutEventArgs ev)
@@ -73,6 +88,12 @@ namespace arda
 				ev.Player.AddItem(ItemType.Medkit);
 				ev.Player.AddItem(ItemType.ArmorHeavy);
 			}
+
+			if (ev.Player.Role == RoleTypeId.ChaosRifleman)
+			{
+				ev.Player.RemoveItem(ItemType.Painkillers);
+				ev.Player.AddItem(ItemType.GrenadeHE);
+			}
 		}
 
 		public override void OnPlayerChangedRole(PlayerChangedRoleEventArgs ev)
@@ -86,26 +107,24 @@ namespace arda
 			if (ev.Player.Team == Team.ChaosInsurgency)
 			{
 				if (_firstHalf.Remove(ev.Player))
-					Info($"{ev.Player.DisplayName} removed from scp, scp count: {_firstHalf.Count}");
+					Info($"{ev.Player.DisplayName} removed from chaos, chaos count: {_firstHalf.Count}");
 				else
-					Info($"could not remove {ev.Player.DisplayName} from scp, scp count: {_firstHalf.Count}");
+					Info($"could not remove {ev.Player.DisplayName} from chaos, chaos count: {_firstHalf.Count}");
 
 				if (!_firstHalf.Any())
 				{
-					Info("going to end the round cuz survivors won");
 					Round.End(true);
 				}
 			}
 			else if (ev.Player.Team == Team.FoundationForces)
 			{
 				if (_secondHalf.Remove(ev.Player))
-					Info($"{ev.Player.DisplayName} removed from survivor, survivor count: {_secondHalf.Count}");
+					Info($"{ev.Player.DisplayName} removed from mtf, mtf count: {_secondHalf.Count}");
 				else
-					Info($"could not remove {ev.Player.DisplayName} from survivor, survivor count: {_secondHalf.Count}");
+					Info($"could not remove {ev.Player.DisplayName} from mtf, mtf count: {_secondHalf.Count}");
 
 				if (!_secondHalf.Any())
 				{
-					Info("going to end the round cuz scp won");
 					Round.End(true);
 				}
 			}
@@ -113,21 +132,20 @@ namespace arda
 
 		public override void OnServerRoundEnding(RoundEndingEventArgs ev)
 		{
-			Info("received round ending");
 			if (_firstHalf.Any())
 			{
 				ev.LeadingTeam = RoundSummary.LeadingTeam.ChaosInsurgency;
-				Info("scp won");
+				Info("chaos won");
 			}
 			else if (_secondHalf.Any())
 			{
 				ev.LeadingTeam = RoundSummary.LeadingTeam.FacilityForces;
-				Info("chaos won");
+				Info("MTF won");
 			}
 			else
 			{
 				ev.LeadingTeam = RoundSummary.LeadingTeam.Draw;
-				Info("no one won?");
+				Info("no one won");
 			}
 		}
 
@@ -143,11 +161,6 @@ namespace arda
 
 			List<Player> plrList = Player.ReadyList.ToList();
 			plrList.Shuffle();
-			Info($"list: {Player.List.Count()} playerlist: {Player.ReadyList.Count()}, plrList: {plrList.Count()}");
-			foreach (Player plr in plrList)
-			{
-				Info($"{plr.DisplayName} is on the list to get drafted");
-			}
 
 			int half = plrList.Count / 2;
 
@@ -179,7 +192,6 @@ namespace arda
 			{
 				if (item.DoorName == DoorName.SurfaceGate || item.DoorName == DoorName.HczCheckpoint)
 				{
-					Info($"door was a {item.DoorName}");
 					item.IsOpened = false;
 					item.Lock(DoorLockReason.AdminCommand, true);
 				}

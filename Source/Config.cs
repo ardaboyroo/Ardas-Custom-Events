@@ -10,7 +10,10 @@ namespace arda
 {
 	internal class Config
 	{
-		[Description("Primary SCP's, you can also use scp ID.")]
+		[Description("The chance of an event occuring, doubles consecutively when no event is chosen.")]
+		public int EventChance { get; set; } = 20;
+
+		[Description("Primary player SCP's, you can also use scp ID.")]
 		public RoleTypeId[] PrimaryScp { get; set; } =
 		{
 			RoleTypeId.Scp173,
@@ -18,7 +21,7 @@ namespace arda
 			RoleTypeId.Scp096
 		};
 
-		[Description("Secondary SCP's, you can also use scp ID.")]
+		[Description("Secondary player SCP's, you can also use scp ID.")]
 		public RoleTypeId[] SecondaryScp { get; set; } =
 		{
 			RoleTypeId.Scp3114,
@@ -49,10 +52,10 @@ namespace arda
 			ItemType.Ammo762x39,
 		};
 
-		[Description("Determines if every player should get a random item or the same.")]
+		[Description("ItemEvent: Determines if every player should get a random item or the same.")]
 		public bool ItemEventRandomitem { get; set; } = true;
 
-		[Description("A list of items players can get during Item Event, you can also use item ID.")]
+		[Description("ItemEvent: A list of items players can get during Item Event, you can also use item ID.")]
 		public ItemType[] ItemEventItems { get; set; } =
 		{
 			ItemType.Adrenaline,

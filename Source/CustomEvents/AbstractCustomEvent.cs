@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace arda
 {
-	internal abstract class AbstractCustomEvent : CustomEventsHandler
+	internal abstract class AbstractCustomEvent : CustomEventsHandler, IDisposable
 	{
 		public abstract string Title { get; }
 		public abstract string Description { get; }
@@ -25,12 +25,6 @@ namespace arda
 			ServerEvents.RoundStarted += BroadcastEvent;
 		}
 
-		~AbstractCustomEvent()
-		{
-			CustomHandlersManager.UnregisterEventsHandler(this);
-			ServerEvents.RoundStarted -= BroadcastEvent;
-		}
-
 		public void BroadcastEvent()
 		{
 			Server.SendBroadcast($"<size=100><color=yellow>{Title}</color></size>\n{Description}", 20, 0, true);
@@ -39,6 +33,12 @@ namespace arda
 		protected void Info(object info)
 		{
 			Logger.Info($"{GetType()}: {info}");
+		}
+
+		public virtual void Dispose()
+		{
+			CustomHandlersManager.UnregisterEventsHandler(this);
+			ServerEvents.RoundStarted -= BroadcastEvent;
 		}
 	}
 }
