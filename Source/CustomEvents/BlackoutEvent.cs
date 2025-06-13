@@ -9,6 +9,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine.Diagnostics;
+using MEC;
+using GameCore;
 
 namespace arda
 {
@@ -23,6 +25,8 @@ namespace arda
 		private List<Player> _survivors = new();
 		private List<Player> _scp = new();
 
+		private CoroutineHandle _wavespawnerHandler;
+
 		public override void OnPlayerReceivedLoadout(PlayerReceivedLoadoutEventArgs ev)
 		{
 			if (ev.Player.Role == RoleTypeId.ClassD)
@@ -35,16 +39,25 @@ namespace arda
 			else if (ev.Player.Role == RoleTypeId.ChaosConscript)
 			{
 				ev.Player.ClearInventory();
-				foreach(ItemType item in _config.BlackoutChaosItems)
+				foreach (ItemType item in _config.BlackoutChaosItems)
 				{
 					ev.Player.AddItem(item);
 				}
 
-				// Prolly better to see what kind of ammo the weapon uses
+				// Probably better to see what kind of ammo the weapon uses
 				ev.Player.SetAmmo(ItemType.Ammo762x39, 180);
-				//ev.Player.MaxHumeShield = 50;
-				//ev.Player.HumeShield = 50;
-				//ev.Player.HumeShieldRegenRate = 0;
+			}
+		}
+
+		public override void OnPlayerChangedRole(PlayerChangedRoleEventArgs ev)
+		{
+			if (ev.NewRole.Team == Team.ClassD)
+			{
+				_survivors.Add(ev.Player);
+			}
+			else if (ev.NewRole.Team == Team.SCPs)
+			{
+				_scp.Add(ev.Player);
 			}
 		}
 
@@ -57,10 +70,14 @@ namespace arda
 			}
 		}
 
+		public override void OnServerRoundRestarted()
+		{
+			Timing.KillCoroutines(_wavespawnerHandler);
+		}
+
 		public override void OnServerRoundEnding(RoundEndingEventArgs ev)
 		{
-			Info("received round ending");
-			if (_scp.Any() )
+			if (_scp.Any())
 			{
 				ev.LeadingTeam = RoundSummary.LeadingTeam.Anomalies;
 				Info("scp won");
@@ -122,15 +139,12 @@ namespace arda
 			if (plrList.Count() < 8)
 			{
 				plrList[0].SetRole(RoleTypeId.Scp939);
-				_scp.Add(plrList[0]);
 				plrList.RemoveAt(0);
 			}
 			else if (plrList.Count() < 16)
 			{
 				plrList[0].SetRole(RoleTypeId.Scp939);
 				plrList[1].SetRole(RoleTypeId.Scp939);
-				_scp.Add(plrList[0]);
-				_scp.Add(plrList[1]);
 				plrList.RemoveAt(1);
 				plrList.RemoveAt(0);
 			}
@@ -139,9 +153,6 @@ namespace arda
 				plrList[0].SetRole(RoleTypeId.Scp939);
 				plrList[1].SetRole(RoleTypeId.Scp939);
 				plrList[2].SetRole(RoleTypeId.Scp939);
-				_scp.Add(plrList[0]);
-				_scp.Add(plrList[1]);
-				_scp.Add(plrList[2]);
 				plrList.RemoveAt(2);
 				plrList.RemoveAt(1);
 				plrList.RemoveAt(0);
@@ -150,7 +161,6 @@ namespace arda
 			foreach (Player player in plrList)
 			{
 				player.SetRole(RoleTypeId.ClassD);
-				_survivors.Add(player);
 			}
 
 			foreach (var light in Map.RoomLights)
@@ -161,6 +171,23 @@ namespace arda
 			Round.IsLocked = true;
 
 			Server.CategoryLimits[ItemCategory.SpecialWeapon] = 2;
+
+			_wavespawnerHandler = Timing.RunCoroutine(WaveTimer());
+		}
+
+		public IEnumerator<float> WaveTimer()
+		{
+			while (true)
+			{
+				yield return Timing.WaitForSeconds((float)_config.BlackoutRespawnWaveTimer);
+				foreach (Player plr in Player.ReadyList)
+				{
+					if (plr.Role == RoleTypeId.Spectator)
+					{
+						plr.SetRole(RoleTypeId.ClassD);
+					}
+				}
+			}
 		}
 	}
 }

@@ -37,6 +37,10 @@
     <Reference Include="Assembly-CSharp">
       <HintPath>D:\SteamLibrary\steamapps\common\SCP Secret Laboratory Dedicated Server\SCPSL_Data\Managed\Assembly-CSharp.dll</HintPath>
     </Reference>
+    <Reference Include="Assembly-CSharp-firstpass, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>D:\SteamLibrary\steamapps\common\SCP Secret Laboratory Dedicated Server\SCPSL_Data\Managed\Assembly-CSharp-firstpass.dll</HintPath>
+    </Reference>
     <Reference Include="CommandSystem.Core">
       <HintPath>D:\SteamLibrary\steamapps\common\SCP Secret Laboratory Dedicated Server\SCPSL_Data\Managed\CommandSystem.Core.dll</HintPath>
     </Reference>
@@ -60,6 +64,10 @@
     <Reference Include="UnityEngine.CoreModule">
       <HintPath>D:\SteamLibrary\steamapps\common\SCP Secret Laboratory Dedicated Server\SCPSL_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
     </Reference>
+    <Reference Include="UnityEngine.PhysicsModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>D:\SteamLibrary\steamapps\common\SCP Secret Laboratory Dedicated Server\SCPSL_Data\Managed\UnityEngine.PhysicsModule.dll</HintPath>
+    </Reference>
     <Reference Include="YamlDotNet, Version=11.0.0.0, Culture=neutral, PublicKeyToken=ec19458f3c15af5e, processorArchitecture=MSIL">
       <HintPath>packages\YamlDotNet.11.0.1\lib\net45\YamlDotNet.dll</HintPath>
     </Reference>
@@ -71,9 +79,11 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Source\CustomEvents\AbstractCustomEvent.cs" />
     <Compile Include="Source\CustomEvents\BlackoutEvent.cs" />
+    <Compile Include="Source\CustomEvents\ClusterEvent.cs" />
     <Compile Include="Source\CustomEvents\ItemEvent.cs" />
     <Compile Include="Source\CustomEvents\TDMEvent.cs" />
     <Compile Include="Source\QolManager.cs" />
+    <Compile Include="Source\QoL\CoinRandomizer.cs" />
     <Compile Include="Source\QoL\ComputerGrenade.cs" />
     <Compile Include="Source\QoL\SCP_330PinkCandy.cs" />
     <Compile Include="Source\QoL\AbstractQoL.cs" />
@@ -88,7 +98,6 @@
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>
-    </PostBuildEvent>
+    <PostBuildEvent>copy /Y "$(TargetDir)$(ProjectName).dll" "C:\Users\ardac\AppData\Roaming\SCP Secret Laboratory\LabAPI\plugins\global\$(ProjectName).dll"</PostBuildEvent>
   </PropertyGroup>
 </Project>

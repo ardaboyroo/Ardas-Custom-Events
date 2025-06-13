@@ -28,10 +28,16 @@ namespace arda
 
 		private List<Player> _firstHalf = new();
 		private List<Player> _secondHalf = new();
+		private int _currentRound = 0;
 
 		public TDMEvent()
 		{
 			InventoryExtensions.OnItemRemoved += OnItemRemoved;
+			if (_currentRound < _config.TdmRoundLimit)
+			{
+				_currentRound++;
+				ArdasCustomEventsPlugin.Instance.CustomEventsManager.KeepCurrentEvent();
+			}
 		}
 
 		public override void Dispose()

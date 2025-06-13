@@ -26,10 +26,12 @@ namespace arda
 					return _currentEvent;
 			}
 		}
+
 		private AbstractCustomEvent _debugEvent;
 		private int _eventChance;
 		private List<Type> _availableEvents;
 		private int _eventCounter = 0;
+		private bool _shouldKeepCurrentEvent = false;
 
 		public CustomEventsManager()
 		{
@@ -45,6 +47,13 @@ namespace arda
 
 		public override void OnServerRoundStarting(RoundStartingEventArgs ev)
 		{
+			if (_shouldKeepCurrentEvent)
+			{
+				_shouldKeepCurrentEvent = false;
+				Logger.Info($"Current Event: {_currentEvent.GetType().Name}");
+				return;
+			}
+
 			_currentEvent?.Dispose();
 			_currentEvent = null;
 			
@@ -62,13 +71,17 @@ namespace arda
 
 				ChooseNextEvent();
 				Logger.Info($"Current Event: {_currentEvent.GetType().Name}");
-
 			}
 			else
 			{
 				_eventChance += _eventChance == 0 ? _config.EventChance : _eventChance;
 				Logger.Info($"No event chosen, chance increased to: {_eventChance}");
 			}
+		}
+
+		public void KeepCurrentEvent()
+		{
+			_shouldKeepCurrentEvent = true;
 		}
 
 		private void RegisterAllCustomEvents()

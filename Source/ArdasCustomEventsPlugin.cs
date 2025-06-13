@@ -17,7 +17,7 @@ namespace arda
 		public override string Name { get; } = "ArdasCustomEvents";
 		public override string Author { get; } = "ardaboyroo";
 		public override string Description { get; } = "This plugin introduces custom events and QoL fixes.";
-		public override Version Version { get; } = new Version(1, 0, 0, 0);
+		public override Version Version { get; } = new Version(1, 1, 0, 0);
 		public override Version RequiredApiVersion { get; } = new(LabApiProperties.CompiledVersion);
 
 		public CustomEventsManager CustomEventsManager { get; private set; }

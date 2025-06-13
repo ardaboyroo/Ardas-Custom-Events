@@ -20,7 +20,7 @@ namespace arda
 			if (!ev.IsAllowed)
 				return;
 
-			if (_random.Next(0, 100) < _config.PinkCandyGrabChance)
+			if (_config.PinkCandyGrabChance >= _random.Next(1, 101))
 			{
 				ev.CandyType = CandyKindID.Pink;
 			}
