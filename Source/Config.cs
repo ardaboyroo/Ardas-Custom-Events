@@ -12,7 +12,7 @@ namespace arda
 	internal class Config
 	{
 		[Description("The chance of an event occuring, doubles consecutively when no event is chosen.")]
-		public int EventChance { get; set; } = 20;
+		public int EventChance { get; set; } = 30;
 
 		[Description("Primary player SCP's, you can also use scp ID.")]
 		public RoleTypeId[] PrimaryScp { get; set; } =

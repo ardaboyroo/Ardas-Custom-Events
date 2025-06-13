@@ -37,6 +37,7 @@ namespace arda
 		{
 			CustomHandlersManager.RegisterEventsHandler(this);
 			_config = ArdasCustomEventsPlugin.Instance.Config;
+			_eventChance = _config.EventChance;
 			RegisterAllCustomEvents();
 		}
 
@@ -56,7 +57,7 @@ namespace arda
 
 			_currentEvent?.Dispose();
 			_currentEvent = null;
-			
+
 
 			if (_debugEvent != null)
 			{
@@ -67,14 +68,14 @@ namespace arda
 			if (_availableEvents.Any() && _random.Next(0, 100) < _eventChance)
 			{
 				Logger.Info($"Event chosen with chance: {_eventChance}");
-				_eventChance = 0;
+				_eventChance = _config.EventChance;
 
 				ChooseNextEvent();
 				Logger.Info($"Current Event: {_currentEvent.GetType().Name}");
 			}
 			else
 			{
-				_eventChance += _eventChance == 0 ? _config.EventChance : _eventChance;
+				_eventChance += _eventChance;
 				Logger.Info($"No event chosen, chance increased to: {_eventChance}");
 			}
 		}
